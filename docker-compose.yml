@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  nginx:
+      build: ./nginx
+      ports:
+        - 80:80
+      depends_on:
+        - web
+      volumes:
+        - ./app/static:/code/static
+  db:
+    image: postgres:alpine
+    environment: 
+      - POSTGRES_USER=iweb_user
+      - POSTGRES_PASSWORD=i@web
+      - POSTGRES_DB=iweb_db
+    volumes: 
+      - ./postgres:/var/lib/postgresql/data
+  web:
+    build: .
+    command: gunicorn -b 0.0.0.0:8000 project.wsgi
+    volumes:
+      - ./app:/code
+    expose: 
+      - 8000
+    depends_on:
+      - db
+    environment: 
+      - SQL_ENGINE=django.db.backends.postgresql
+      - SQL_DATABASE=iweb_db
+      - SQL_USER=iweb_user
+      - SQL_PASSWORD=i@web
+      - SQL_HOST=db
+      - SQL_PORT=5432
+      - SECRET_KEY=8-3ob^awvp&$w(_og71k!&s)+i20s53qqmd5za+80u@nni96rm
